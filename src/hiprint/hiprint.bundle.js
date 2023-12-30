@@ -54,7 +54,7 @@ import vImg from "./css/image/v_img.svg";
 import {jsPDF} from "jspdf";
 import html2canvas from "html2canvas";
 // 数字转中文,大写,金额
-import Nzh from "nzh/dist/nzh.min.js";
+import Nzh from "nzh";
 // 解析svg 到 canvas, 二维码条形码需要
 import Canvg from 'canvg';
 // 默认自定义拖拽列表
@@ -1278,6 +1278,12 @@ var hiprint = function (t) {
           }
           // ctrl + c / command + c
           if ((r.ctrlKey || r.metaKey) && 67 == r.keyCode) {
+            if (n._editing) {
+              // 编辑状态禁止复制
+              var copyArea = $("#copyArea");
+              copyArea?.text("");
+              return;
+            }
             n.copyJson();
             r.preventDefault();
           }
@@ -9471,6 +9477,20 @@ var hiprint = function (t) {
           // ctrl + v / command + v
           if ('INPUT' == e.target.tagName) return;
           if ((e.ctrlKey || e.metaKey) && 86 == e.keyCode) {
+            if (e.target.className.includes("editing")) {
+              var copyArea = $("#copyArea");
+              try {
+                var json = copyArea.text();
+                var obj = JSON.parse(json);
+                if (obj.printElementType || obj.templateId) {
+                  console.log("复制的是模板元素，阻止粘贴事件")
+                  e.preventDefault();
+                }
+              } catch (err) {
+                console.log("复制的是非模板元素文本")
+              }
+              return;
+            }
             n.pasteJson(e);
             e.preventDefault();
           }
