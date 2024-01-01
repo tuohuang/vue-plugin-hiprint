@@ -9459,7 +9459,8 @@ var hiprint = function (t) {
       }, t.prototype.bindShortcutKeyEvent = function () {
         var n = this;
         $(document).keydown(function (e) {
-          if ('INPUT' == e.target.tagName) return;
+          if(e.target.className.includes("editing")) return;
+          if (["INPUT", 'TEXTAREA'].includes(e.target.tagName)) return;
           // ctrl/command + z 撤销 / ctrl/command + shift + z 重做
           if ((e.ctrlKey || e.metaKey) && 90 == e.keyCode) {
             if (e.shiftKey) {
@@ -9469,13 +9470,21 @@ var hiprint = function (t) {
             }
             e.preventDefault();
           }
+          if ((e.ctrlKey || e.metaKey) && 89 == e.keyCode) {
+            if (e.shiftKey) {
+              o.a.event.trigger("hiprintTemplateDataShortcutKey_" + n.templateId, "undo");
+            } else {
+              o.a.event.trigger("hiprintTemplateDataShortcutKey_" + n.templateId, "redo");
+            }
+            e.preventDefault();
+          }
         });
       }, t.prototype.bingPasteEvent = function () {
         var n = this;
         n.designPaper.target.attr("tabindex", "1");
         n.designPaper.target.keydown(function (e) {
           // ctrl + v / command + v
-          if ('INPUT' == e.target.tagName) return;
+          if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
           if ((e.ctrlKey || e.metaKey) && 86 == e.keyCode) {
             if (e.target.className.includes("editing")) {
               var copyArea = $("#copyArea");
